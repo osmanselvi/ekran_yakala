@@ -77,7 +77,11 @@ class CommandGenerator:
         # Video filters
         if self.show_timestamp:
             font_path = self._get_font_path()
-            # Escape the colon in date format: %H:%M:%S -> %H\\:%M\\:%S
+            # FFmpeg drawtext local time overlay
+            # On Windows, we must escape the drive colon: C\:
+            if self.os_type == "Windows" and ":" in font_path:
+                font_path = font_path.replace(":", "\\:")
+            
             timestamp_filter = (
                 f"drawtext=fontfile='{font_path}':"
                 "text='%{{localtime\\:%Y-%m-%d %H\\\\\\:%M\\\\\\:%S}}':"
