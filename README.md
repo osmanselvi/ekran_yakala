@@ -3,12 +3,13 @@
 A high-performance screen recording utility for Linux (optimized for Raspberry Pi 5) with System Tray GUI, microphone support, and live timestamp overlay.
 
 ## Features
-- **High Performance**: Uses FFmpeg with X11 capture.
-- **System Tray GUI**: Manage recordings via a tray icon (gray/red state).
-- **Audio Support**: Record from the default microphone using PulseAudio.
-- **Timestamp Overlay**: Live date and time display in the top-right corner.
-- **Configurable**: Easily change format (MP4, AVI, MKV), FPS, and resolution.
-- **Desktop Notifications**: Visual feedback for recording status.
+- **Multi-Platform**: Robust support for Linux (X11) and Windows (GDI).
+- **Multi-Monitor**: Select specific monitors or custom capture regions on Windows.
+- **Audio Support**: Configure specific audio devices (Realtek, PulseAudio, etc.).
+- **System Tray GUI**: Visual status indicators (gray idle, red recording).
+- **Graceful Termination**: Ensures MP4 files are finalized correctly on exit.
+- **Timestamp Overlay**: Dynamic date and time overlay on video output.
+- **Configurable**: Adjustable FPS, Resolution, and Formats (MP4, MKV, AVI).
 
 ## Prerequisites
 - **Linux**: FFmpeg, PulseAudio, Python 3.x, `libnotify-bin`.
