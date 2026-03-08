@@ -12,21 +12,14 @@ def build():
         print("Error: PyInstaller is not installed. Please run: pip install pyinstaller")
         return
 
-    # Assets to include: (source, destination)
-    # destination 'assets' means it will be at the same level as the exe if we use --onefile
-    # or inside the folder if we use --onedir.
-    # We'll use a .spec file for more control, but for a simple start:
+    # Using the .spec file is more reliable for pystray and assets
+    spec_file = "screen_recorder.spec"
     
-    cmd = [
-        "pyinstaller",
-        "--noconfirm",
-        "--onefile",
-        "--windowed", # No console window
-        "--name", "EkranYakala",
-        "--icon", "assets/icon_idle.png",
-        "--add-data", "assets;assets", # Include assets folder
-        "src/gui_main.py"
-    ]
+    if not os.path.exists(spec_file):
+        print(f"Error: {spec_file} not found.")
+        return
+
+    cmd = ["pyinstaller", "--noconfirm", spec_file]
 
     print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd)
