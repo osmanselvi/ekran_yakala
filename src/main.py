@@ -66,10 +66,12 @@ def main():
             recorder.stop()
         sys.exit(1)
 
-    if os.path.exists(full_output_path):
+    if os.path.exists(full_output_path) and os.path.getsize(full_output_path) > 1024:
         print(f"Success! Video saved to: {os.path.abspath(full_output_path)}")
     else:
-        print("Error: Video file was not created. Check FFmpeg output or permissions.")
+        print("Error: Video file is empty or too small. Recording likely failed.")
+        if os.path.exists(full_output_path) and os.path.getsize(full_output_path) <= 1024:
+            print("Note: 1KB files usually indicate an FFmpeg initialization error.")
 
 if __name__ == "__main__":
     main()
