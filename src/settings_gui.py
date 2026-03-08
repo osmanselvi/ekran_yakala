@@ -11,7 +11,8 @@ DEFAULT_CONFIG = {
     "resolution": "1920x1080",
     "use_mic": False,
     "display": ":10.0",
-    "show_timestamp": True
+    "show_timestamp": True,
+    "audio_device": "default"
 }
 
 def load_config():
@@ -50,9 +51,14 @@ class SettingsDialog:
         tk.Entry(self.root, textvariable=self.res_var).pack()
 
         # Display
-        tk.Label(self.root, text="Display:").pack(pady=5)
+        tk.Label(self.root, text="Display / Desktop:").pack(pady=5)
         self.display_var = tk.StringVar(value=self.config['display'])
         tk.Entry(self.root, textvariable=self.display_var).pack()
+
+        # Audio Device
+        tk.Label(self.root, text="Audio Device (e.g. Mikrofon ...):").pack(pady=5)
+        self.audio_device_var = tk.StringVar(value=self.config.get('audio_device', 'default'))
+        tk.Entry(self.root, textvariable=self.audio_device_var).pack()
         
         # Microphone
         self.mic_var = tk.BooleanVar(value=self.config['use_mic'])
@@ -75,7 +81,8 @@ class SettingsDialog:
                 "resolution": self.res_var.get(),
                 "display": self.display_var.get(),
                 "use_mic": self.mic_var.get(),
-                "show_timestamp": self.timestamp_var.get()
+                "show_timestamp": self.timestamp_var.get(),
+                "audio_device": self.audio_device_var.get()
             }
             save_config(new_config)
             self.config = new_config

@@ -8,7 +8,7 @@ class CommandGenerator:
 
     SUPPORTED_FORMATS = ['mp4', 'avi', 'mkv']
 
-    def __init__(self, display=None, fps=30, resolution="1920x1080", use_mic=False, show_timestamp=True):
+    def __init__(self, display=None, fps=30, resolution="1920x1080", use_mic=False, show_timestamp=True, audio_device=None):
         self.os_type = platform.system()
         # Default display/input based on OS
         if display is None:
@@ -16,6 +16,16 @@ class CommandGenerator:
         else:
             self.display = display
             
+        # Default audio device based on OS
+        if audio_device is None:
+            self.audio_device = "default" if self.os_type == "Linux" else "audio=Microphone"
+        else:
+            # Add 'audio=' prefix for Windows dshow if not present
+            if self.os_type == "Windows" and not audio_device.startswith("audio="):
+                self.audio_device = f"audio={audio_device}"
+            else:
+                self.audio_device = audio_device
+
         self.fps = fps
         self.resolution = resolution
         self.use_mic = use_mic
@@ -39,10 +49,9 @@ class CommandGenerator:
         # Input: Audio
         if self.use_mic:
             if self.os_type == "Linux":
-                args.extend(["-f", "pulse", "-i", "default", "-ac", "2"])
+                args.extend(["-f", "pulse", "-i", self.audio_device, "-ac", "2"])
             elif self.os_type == "Windows":
-                # Note: 'Microphone' is a common generic name, but dshow names vary.
-                args.extend(["-f", "dshow", "-i", "audio=Microphone", "-ac", "2"])
+                args.extend(["-f", "dshow", "-i", self.audio_device, "-ac", "2"])
 
         # Input: Video
         if self.os_type == "Linux":

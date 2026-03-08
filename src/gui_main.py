@@ -56,7 +56,8 @@ class ScreenRecorderGUI:
             fps=self.config.get('fps', 30),
             resolution=self.config.get('resolution', "1920x1080"),
             use_mic=self.config.get('use_mic', False),
-            show_timestamp=self.config.get('show_timestamp', True)
+            show_timestamp=self.config.get('show_timestamp', True),
+            audio_device=self.config.get('audio_device')
         )
         self.recorder = RecorderManager(generator)
         

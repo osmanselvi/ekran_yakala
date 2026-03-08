@@ -13,6 +13,7 @@ def main():
     parser.add_argument("--res", type=str, default="1920x1080", help="Resolution (e.g. 1920x1080)")
     parser.add_argument("--display", type=str, default=":0.0", help="X11 Display")
     parser.add_argument("--mic", action="store_true", help="Enable microphone recording")
+    parser.add_argument("--audio-device", type=str, help="Audio device name (Windows) or index (Linux)")
     parser.add_argument("--timestamp", action="store_true", default=True, help="Show timestamp overlay (default: True)")
     parser.add_argument("--no-timestamp", action="store_false", dest="timestamp", help="Disable timestamp overlay")
 
@@ -26,7 +27,8 @@ def main():
         fps=args.fps, 
         resolution=args.res,
         use_mic=args.mic,
-        show_timestamp=args.timestamp
+        show_timestamp=args.timestamp,
+        audio_device=args.audio_device
     )
     recorder = RecorderManager(generator)
 
