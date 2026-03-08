@@ -17,8 +17,14 @@ class CommandGenerator:
             self.display = display
             
         # Default audio device based on OS
-        if audio_device is None:
-            self.audio_device = "default" if self.os_type == "Linux" else "audio=Microphone"
+        if not audio_device or audio_device == "default":
+            if self.os_type == "Linux":
+                self.audio_device = "default"
+            else:
+                # On Windows, 'default' is not a valid dshow device name usually.
+                # If None, it will fallback to audio=Microphone or whatever is set below.
+                # However, we want to try to use what was passed if it's not simply 'default'.
+                self.audio_device = "audio=Mikrofon (Realtek(R) Audio)" # Specific to user, or a generic placeholder
         else:
             # Add 'audio=' prefix for Windows dshow if not present
             if self.os_type == "Windows" and not audio_device.startswith("audio="):
