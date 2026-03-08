@@ -21,10 +21,11 @@ class RecorderManager:
         args = self.command_generator.generate_args(output_path)
         
         # Cross-platform subprocess configuration
+        # We use DEVNULL for stderr to prevent pipe buffer deadlocks on Windows
         kwargs = {
             "stdin": subprocess.PIPE,
             "stdout": subprocess.DEVNULL,
-            "stderr": subprocess.PIPE
+            "stderr": subprocess.DEVNULL
         }
 
         if self.os_type == "Linux":
@@ -48,31 +49,38 @@ class RecorderManager:
             # 1. Try sending 'q' to stdin (FFmpeg's preferred way)
             if self.process.stdin:
                 try:
-                    self.process.stdin.write(b'q')
+                    self.process.stdin.write(b'q\n')
                     self.process.stdin.flush()
                 except (OSError, BrokenPipeError):
-                    pass # Stdin might be closed already
+                    pass
 
-            # 2. Wait a bit for graceful exit
+            # 2. Wait for graceful exit
             try:
                 self.process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 # 3. If still running, try signals
                 print("FFmpeg still running, sending stop signal...")
                 if self.os_type == "Linux":
-                    os.killpg(os.getpgid(self.process.pid), signal.SIGINT)
+                    try:
+                        os.killpg(os.getpgid(self.process.pid), signal.SIGINT)
+                    except:
+                        pass
                 elif self.os_type == "Windows":
+                    # Send CTRL_BREAK_EVENT to the process group
                     self.process.send_signal(signal.CTRL_BREAK_EVENT)
                 
-                self.process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            print("FFmpeg did not stop in time. Forcing termination...")
-            self.process.terminate()
+                try:
+                    self.process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    print("FFmpeg did not stop in time. Forcing termination...")
+                    self.process.terminate()
         except Exception as e:
             print(f"Error while stopping: {e}")
         finally:
             self.process = None
             self.status = "IDLE"
+            # Give a moment for the file system to release the file
+            time.sleep(1)
             print("Recording stopped.")
 
     def is_recording(self):
@@ -81,10 +89,6 @@ class RecorderManager:
             if self.process.poll() is None:
                 return True
             else:
-                # Process died unexpectedly, check stderr
-                _, stderr = self.process.communicate()
-                if stderr:
-                    print(f"FFmpeg Error Output: {stderr.decode()}")
                 self.status = "IDLE"
                 self.process = None
         return False

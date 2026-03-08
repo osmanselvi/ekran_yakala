@@ -90,7 +90,8 @@ class ScreenRecorderGUI:
     def exit_app(self):
         if self.recorder and self.recorder.is_recording():
             self.recorder.stop()
-        sys.exit(0)
+        self.tray.stop()
+        os._exit(0)
 
     def run(self):
         self.tray.run()
