@@ -11,32 +11,32 @@ A high-performance screen recording utility for Linux (optimized for Raspberry P
 - **Desktop Notifications**: Visual feedback for recording status.
 
 ## Prerequisites
-- Linux OS (Tested on Raspberry Pi 5 / Debian)
-- FFmpeg
-- PulseAudio (for microphone support)
-- Python 3.x
-- Dependencies: `pystray`, `Pillow`, `libnotify-bin`, `python3-tk`
+- **Linux**: FFmpeg, PulseAudio, Python 3.x, `libnotify-bin`.
+- **Windows**: [FFmpeg](https://ffmpeg.org/download.html) (add to PATH), Python 3.x.
 
 ## Installation
 
+### Linux (Debian/Raspberry Pi)
 ```bash
-# Clone the repository
-git clone https://github.com/osmanselvi/ekran_yakala.git
-cd ekran_yakala
-
-# Install system dependencies
 sudo apt-get update
 sudo apt-get install -y ffmpeg libnotify-bin python3-tk python3-pystray python3-pil
+```
+
+### Windows
+1. Install **FFmpeg** and ensure it's available in your Command Prompt (`ffmpeg -version`).
+2. Install Python dependencies:
+```powershell
+pip install pystray Pillow
 ```
 
 ## Usage
 
 ### System Tray GUI (Recommended)
-Launch the application in your graphical session:
-```bash
-python3 -m src.gui_main
-```
-*Note: If running over SSH to a specific display (e.g., XRDP), ensure `DISPLAY` and `XAUTHORITY` are set.*
+Launch the application:
+- **Linux**: `python3 -m src.gui_main`
+- **Windows**: `python -m src.gui_main`
+
+*Note: On Linux/XRDP, ensure `DISPLAY` and `XAUTHORITY` variables are correctly set if running via SSH.*
 
 ### Command Line Interface
 ```bash
