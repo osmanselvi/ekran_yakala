@@ -55,9 +55,9 @@ class CommandGenerator:
             if self.os_type == "Linux":
                 args.extend(["-f", "pulse", "-i", self.audio_device, "-ac", "2"])
             elif self.os_type == "Windows":
-                # For Windows dshow, sometimes quoting the device name helps FFmpeg parse properly
-                # inside the subprocess call.
-                args.extend(["-f", "dshow", "-i", self.audio_device, "-ac", "2"])
+                # Quote the device name to handle spaces and parentheses
+                audio_input = f'"{self.audio_device}"' if not self.audio_device.startswith('"') else self.audio_device
+                args.extend(["-f", "dshow", "-i", audio_input, "-ac", "2"])
 
         # Input: Video
         if self.os_type == "Linux":

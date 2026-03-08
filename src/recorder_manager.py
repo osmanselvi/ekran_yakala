@@ -43,16 +43,28 @@ class RecorderManager:
             print("No recording in progress to stop.")
             return
 
+        print("Stopping recording gracefully...")
         try:
-            if self.os_type == "Linux":
-                # Send SIGINT to the process group
-                os.killpg(os.getpgid(self.process.pid), signal.SIGINT)
-            elif self.os_type == "Windows":
-                # Send CTRL_BREAK_EVENT to the process group
-                self.process.send_signal(signal.CTRL_BREAK_EVENT)
-            
-            # Wait for it to finish
-            self.process.wait(timeout=10)
+            # 1. Try sending 'q' to stdin (FFmpeg's preferred way)
+            if self.process.stdin:
+                try:
+                    self.process.stdin.write(b'q')
+                    self.process.stdin.flush()
+                except (OSError, BrokenPipeError):
+                    pass # Stdin might be closed already
+
+            # 2. Wait a bit for graceful exit
+            try:
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                # 3. If still running, try signals
+                print("FFmpeg still running, sending stop signal...")
+                if self.os_type == "Linux":
+                    os.killpg(os.getpgid(self.process.pid), signal.SIGINT)
+                elif self.os_type == "Windows":
+                    self.process.send_signal(signal.CTRL_BREAK_EVENT)
+                
+                self.process.wait(timeout=5)
         except subprocess.TimeoutExpired:
             print("FFmpeg did not stop in time. Forcing termination...")
             self.process.terminate()
