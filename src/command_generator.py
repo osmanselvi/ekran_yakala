@@ -21,10 +21,8 @@ class CommandGenerator:
             if self.os_type == "Linux":
                 self.audio_device = "default"
             else:
-                # On Windows, 'default' is not a valid dshow device name usually.
-                # If None, it will fallback to audio=Microphone or whatever is set below.
-                # However, we want to try to use what was passed if it's not simply 'default'.
-                self.audio_device = "audio=Mikrofon (Realtek(R) Audio)" # Specific to user, or a generic placeholder
+                # On Windows, Mikrofon (Realtek(R) Audio) is the user's specific device
+                self.audio_device = "audio=Mikrofon (Realtek(R) Audio)"
         else:
             # Add 'audio=' prefix for Windows dshow if not present
             if self.os_type == "Windows" and not audio_device.startswith("audio="):
@@ -57,6 +55,8 @@ class CommandGenerator:
             if self.os_type == "Linux":
                 args.extend(["-f", "pulse", "-i", self.audio_device, "-ac", "2"])
             elif self.os_type == "Windows":
+                # For Windows dshow, sometimes quoting the device name helps FFmpeg parse properly
+                # inside the subprocess call.
                 args.extend(["-f", "dshow", "-i", self.audio_device, "-ac", "2"])
 
         # Input: Video
@@ -76,18 +76,23 @@ class CommandGenerator:
 
         # Video filters
         if self.show_timestamp:
-            font_path = self._get_font_path()
-            # FFmpeg drawtext local time overlay
-            # On Windows, we must escape the drive colon: C\:
-            if self.os_type == "Windows" and ":" in font_path:
-                font_path = font_path.replace(":", "\\:")
-            
-            timestamp_filter = (
-                f"drawtext=fontfile='{font_path}':"
-                "text='%{{localtime\\:%Y-%m-%d %H\\\\\\:%M\\\\\\:%S}}':"
-                "x=w-tw-10:y=10:fontsize=24:fontcolor=white:"
-                "box=1:boxcolor=black@0.5"
-            )
+            if self.os_type == "Windows":
+                # On Windows, using the font name 'Arial' is more reliable than path escaping
+                # especially with colons in C:\
+                timestamp_filter = (
+                    "drawtext=font='Arial':"
+                    "text='%{localtime\\:%Y-%m-%d %H\\\\\\:%M\\\\\\:%S}':"
+                    "x=w-tw-10:y=10:fontsize=24:fontcolor=white:"
+                    "box=1:boxcolor=black@0.5"
+                )
+            else:
+                font_path = self._get_font_path()
+                timestamp_filter = (
+                    f"drawtext=fontfile='{font_path}':"
+                    "text='%{{localtime\\:%Y-%m-%d %H\\\\\\:%M\\\\\\:%S}}':"
+                    "x=w-tw-10:y=10:fontsize=24:fontcolor=white:"
+                    "box=1:boxcolor=black@0.5"
+                )
             args.extend(["-vf", timestamp_filter])
 
         # Add codec and quality settings
@@ -115,9 +120,10 @@ class CommandGenerator:
                 "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
             ]
         elif self.os_type == "Windows":
+            # This is a fallback now as we try 'Arial' name first
             paths = [
-                "C\\:/Windows/Fonts/arial.ttf",
-                "C\\:/Windows/Fonts/segoeui.ttf"
+                "C:/Windows/Fonts/arial.ttf",
+                "C:/Windows/Fonts/segoeui.ttf"
             ]
         else:
             return "arial.ttf"
