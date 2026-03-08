@@ -44,6 +44,13 @@ Launch the application:
 python3 -m src.main --output recording --mic
 ```
 
+## Creating Windows Executable (.exe)
+To create a standalone EXE for Windows:
+1. Ensure you are on a Windows machine.
+2. Install PyInstaller: `pip install pyinstaller`
+3. Run the build script: `python build_exe.py`
+4. The executable will be generated in the `dist/` folder.
+
 ## Configuration
 Settings are stored in `config.json`. You can modify this file or use the GUI settings dialog to update format, resolution, and more.
 
