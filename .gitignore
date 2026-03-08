@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Recordings
+*.mp4
+*.avi
+*.mkv
+recording_*.mp4
+testim.mp4
+testim_sesli.mp4
+test_timestamp_manual.mp4
+
+# Config
+config.json
+
+# Specs/Internal
+.gemini/
+.codex/
+.agent/
+brain/
+implementation_task*.md
+task*.md
+
+# OS
+.DS_Store
+Thumbs.db
