@@ -2,6 +2,7 @@ import subprocess
 import signal
 import os
 import time
+import platform
 
 class RecorderManager:
     """Manages the FFmpeg process for screen recording."""
@@ -10,6 +11,7 @@ class RecorderManager:
         self.command_generator = command_generator
         self.process = None
         self.status = "IDLE"
+        self.os_type = platform.system()
 
     def start(self, output_path):
         """Starts the screen recording process."""
@@ -18,14 +20,19 @@ class RecorderManager:
 
         args = self.command_generator.generate_args(output_path)
         
-        # Start ffmpeg in a subshell, using a new process group to allow easy termination
-        self.process = subprocess.Popen(
-            args,
-            stdin=subprocess.PIPE,
-            preexec_fn=os.setsid,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE
-        )
+        # Cross-platform subprocess configuration
+        kwargs = {
+            "stdin": subprocess.PIPE,
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.PIPE
+        }
+
+        if self.os_type == "Linux":
+            kwargs["preexec_fn"] = os.setsid
+        elif self.os_type == "Windows":
+            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+        self.process = subprocess.Popen(args, **kwargs)
         self.status = "RECORDING"
         print(f"Recording started. Output: {output_path}")
 
@@ -35,10 +42,13 @@ class RecorderManager:
             print("No recording in progress to stop.")
             return
 
-        # FFmpeg expects 'q' or SIGINT to stop gracefully
         try:
-            # Send SIGINT to the process group
-            os.killpg(os.getpgid(self.process.pid), signal.SIGINT)
+            if self.os_type == "Linux":
+                # Send SIGINT to the process group
+                os.killpg(os.getpgid(self.process.pid), signal.SIGINT)
+            elif self.os_type == "Windows":
+                # Send CTRL_BREAK_EVENT to the process group
+                self.process.send_signal(signal.CTRL_BREAK_EVENT)
             
             # Wait for it to finish
             self.process.wait(timeout=10)
