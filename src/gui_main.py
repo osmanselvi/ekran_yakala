@@ -7,7 +7,8 @@ import platform
 from src.recorder_manager import RecorderManager
 from src.command_generator import CommandGenerator
 from src.tray_manager import TrayManager
-from src.settings_gui import SettingsDialog, load_config
+from src.config_utils import load_config
+from src.settings_gui import SettingsDialog
 
 def send_notification(title, message):
     """Sends a desktop notification based on the platform."""

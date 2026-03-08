@@ -1,29 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import json
-import os
-
-CONFIG_FILE = 'config.json'
-
-DEFAULT_CONFIG = {
-    "format": "mp4",
-    "fps": 30,
-    "resolution": "1920x1080",
-    "use_mic": False,
-    "display": ":10.0",
-    "show_timestamp": True,
-    "audio_device": "default"
-}
-
-def load_config():
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r') as f:
-            return {**DEFAULT_CONFIG, **json.load(f)}
-    return DEFAULT_CONFIG.copy()
-
-def save_config(config):
-    with open(CONFIG_FILE, 'w') as f:
-        json.dump(config, f, indent=4)
+from src.config_utils import load_config, save_config
 
 class SettingsDialog:
     def __init__(self, on_save_callback):
@@ -33,7 +10,7 @@ class SettingsDialog:
     def show(self):
         self.root = tk.Tk()
         self.root.title("Screen Recorder Settings")
-        self.root.geometry("300x400")
+        self.root.geometry("300x420")
         
         # Format
         tk.Label(self.root, text="Video Format:").pack(pady=5)
@@ -93,5 +70,4 @@ class SettingsDialog:
             messagebox.showerror("Error", "Invalid FPS value. Please enter a number.")
 
 if __name__ == "__main__":
-    # Test dialog
     SettingsDialog(lambda c: print(f"Saved: {c}")).show()
