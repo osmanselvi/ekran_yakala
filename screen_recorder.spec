@@ -3,11 +3,11 @@
 block_cipher = None
 
 a = Analysis(
-    ['src/gui_main.py'],
-    pathex=[],
+    ['launcher.py'],
+    pathex=['.'],
     binaries=[],
     datas=[('assets', 'assets')],
-    hiddenimports=['pystray._win32'], # Specifically for pystray on Windows
+    hiddenimports=['pystray._win32', 'src.recorder_manager', 'src.command_generator', 'src.config_utils', 'src.settings_gui', 'src.gui_main', 'src.resource_utils'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

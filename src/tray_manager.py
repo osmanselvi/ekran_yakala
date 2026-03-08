@@ -3,6 +3,8 @@ from PIL import Image
 import threading
 import os
 
+from src.resource_utils import resource_path
+
 class TrayManager:
     """Manages the system tray icon and its menu."""
 
@@ -12,9 +14,9 @@ class TrayManager:
         self.settings_callback = settings_callback
         self.exit_callback = exit_callback
         
-        # Load icons
-        self.icon_idle = Image.open('assets/icon_idle.png')
-        self.icon_recording = Image.open('assets/icon_recording.png')
+        # Load icons using resource_path for PyInstaller compatibility
+        self.icon_idle = Image.open(resource_path('assets/icon_idle.png'))
+        self.icon_recording = Image.open(resource_path('assets/icon_recording.png'))
         
         # Initial menu
         self.menu = pystray.Menu(
