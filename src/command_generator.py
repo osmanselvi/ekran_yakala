@@ -1,12 +1,21 @@
+import platform
 import os
 
 class CommandGenerator:
-    """Generates FFmpeg command arguments for screen recording on Linux."""
+    """
+    Generates FFmpeg command-line arguments based on parameters and OS.
+    """
 
     SUPPORTED_FORMATS = ['mp4', 'avi', 'mkv']
 
-    def __init__(self, display=":0.0", fps=30, resolution="1920x1080", use_mic=False, show_timestamp=True):
-        self.display = display
+    def __init__(self, display=None, fps=30, resolution="1920x1080", use_mic=False, show_timestamp=True):
+        self.os_type = platform.system()
+        # Default display/input based on OS
+        if display is None:
+            self.display = ":0.0" if self.os_type == "Linux" else "desktop"
+        else:
+            self.display = display
+            
         self.fps = fps
         self.resolution = resolution
         self.use_mic = use_mic
@@ -25,32 +34,38 @@ class CommandGenerator:
             raise ValueError(f"Unsupported format: {extension}. Supported formats: {self.SUPPORTED_FORMATS}")
 
         # Base command
-        args = ["ffmpeg"]
+        args = ["ffmpeg", "-y"] # -y to overwrite by default
 
-        # Input: Audio (Microphone via PulseAudio)
+        # Input: Audio
         if self.use_mic:
-            args.extend([
-                "-f", "pulse",
-                "-i", "default",  # Use default input device
-                "-ac", "2"       # 2 channels (stereo)
-            ])
+            if self.os_type == "Linux":
+                args.extend(["-f", "pulse", "-i", "default", "-ac", "2"])
+            elif self.os_type == "Windows":
+                # Note: 'Microphone' is a common generic name, but dshow names vary.
+                args.extend(["-f", "dshow", "-i", "audio=Microphone", "-ac", "2"])
 
-        # Input: Video (Screen capture on X11)
-        args.extend([
-            "-f", "x11grab",
-            "-video_size", self.resolution,
-            "-framerate", str(self.fps),
-            "-i", self.display,
-        ])
+        # Input: Video
+        if self.os_type == "Linux":
+            args.extend([
+                "-f", "x11grab",
+                "-video_size", self.resolution,
+                "-framerate", str(self.fps),
+                "-i", self.display,
+            ])
+        elif self.os_type == "Windows":
+            args.extend([
+                "-f", "gdigrab",
+                "-framerate", str(self.fps),
+                "-i", self.display,
+            ])
 
         # Video filters
         if self.show_timestamp:
+            font_path = self._get_font_path()
             # Escape the colon in date format: %H:%M:%S -> %H\\:%M\\:%S
-            # FFmpeg drawtext local time overlay in top-right
-            font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
             timestamp_filter = (
-                f"drawtext=fontfile={font_path}:"
-                "text='%{localtime\\:%Y-%m-%d %H\\\\\\:%M\\\\\\:%S}':"
+                f"drawtext=fontfile='{font_path}':"
+                "text='%{{localtime\\:%Y-%m-%d %H\\\\\\:%M\\\\\\:%S}}':"
                 "x=w-tw-10:y=10:fontsize=24:fontcolor=white:"
                 "box=1:boxcolor=black@0.5"
             )
@@ -72,3 +87,22 @@ class CommandGenerator:
         args.append(output_path)
         
         return args
+
+    def _get_font_path(self):
+        """Returns a valid system font path based on the OS."""
+        if self.os_type == "Linux":
+            paths = [
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+            ]
+        elif self.os_type == "Windows":
+            paths = [
+                "C\\:/Windows/Fonts/arial.ttf",
+                "C\\:/Windows/Fonts/segoeui.ttf"
+            ]
+        else:
+            return "arial.ttf"
+
+        for p in paths:
+            return p
+        return "arial.ttf"
