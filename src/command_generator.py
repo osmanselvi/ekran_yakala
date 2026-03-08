@@ -8,7 +8,7 @@ class CommandGenerator:
 
     SUPPORTED_FORMATS = ['mp4', 'avi', 'mkv']
 
-    def __init__(self, display=None, fps=30, resolution="1920x1080", use_mic=False, show_timestamp=True, audio_device=None):
+    def __init__(self, display=None, fps=30, resolution="1920x1080", use_mic=False, show_timestamp=True, audio_device=None, offset_x=0, offset_y=0):
         self.os_type = platform.system()
         # Default display/input based on OS
         if display is None:
@@ -21,7 +21,6 @@ class CommandGenerator:
             if self.os_type == "Linux":
                 self.audio_device = "default"
             else:
-                # On Windows, Mikrofon (Realtek(R) Audio) is the user's specific device
                 self.audio_device = "audio=Mikrofon (Realtek(R) Audio)"
         else:
             # Add 'audio=' prefix for Windows dshow if not present
@@ -32,6 +31,8 @@ class CommandGenerator:
 
         self.fps = fps
         self.resolution = resolution
+        self.offset_x = offset_x
+        self.offset_y = offset_y
         self.use_mic = use_mic
         self.show_timestamp = show_timestamp
 
@@ -69,6 +70,9 @@ class CommandGenerator:
             args.extend([
                 "-f", "gdigrab",
                 "-framerate", str(self.fps),
+                "-video_size", self.resolution,
+                "-offset_x", str(self.offset_x),
+                "-offset_y", str(self.offset_y),
                 "-i", self.display,
             ])
 

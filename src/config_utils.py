@@ -13,7 +13,8 @@ def get_default_config():
         "use_mic": False,
         "display": ":0.0" if os_type == "Linux" else "desktop",
         "show_timestamp": True,
-        "audio_device": "default" if os_type == "Linux" else "Mikrofon (Realtek(R) Audio)"
+        "audio_device": "default" if os_type == "Linux" else "Mikrofon (Realtek(R) Audio)",
+        "monitor_index": "0"  # 0: All, 1: Monitor 1, 2: Monitor 2
     }
 
 def load_config():

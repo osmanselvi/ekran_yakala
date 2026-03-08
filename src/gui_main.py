@@ -58,18 +58,22 @@ class ScreenRecorderGUI:
             resolution=self.config.get('resolution', "1920x1080"),
             use_mic=self.config.get('use_mic', False),
             show_timestamp=self.config.get('show_timestamp', True),
-            audio_device=self.config.get('audio_device')
+            audio_device=self.config.get('audio_device'),
+            offset_x=self.config.get('offset_x', 0),
+            offset_y=self.config.get('offset_y', 0)
         )
         self.recorder = RecorderManager(generator)
         
-        # Generate filename
+        # Generate unique filename with preferred format
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = f"recording_{timestamp}.{self.config.get('format', 'mp4')}"
-        output_path = os.path.abspath(output_file)
+        output_prefix = self.config.get('output_prefix', 'recording')
+        fmt = self.config.get('format', 'mp4')
+        output_filename = f"{output_prefix}_{timestamp}.{fmt}"
+        output_path = os.path.abspath(output_filename)
         
         try:
             self.recorder.start(output_path)
-            send_notification("Recording Started", f"Saving to {output_file}")
+            send_notification("Recording Started", f"Saving to {output_filename}")
         except Exception as e:
             send_notification("Error", f"Failed to start recording: {e}")
             self.tray.update_menu(recording=False)
