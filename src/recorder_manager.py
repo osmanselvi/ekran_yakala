@@ -35,6 +35,7 @@ class RecorderManager:
         self.process = subprocess.Popen(args, **kwargs)
         self.status = "RECORDING"
         print(f"Recording started. Output: {output_path}")
+        print(f"FFmpeg Command: {' '.join(args)}")
 
     def stop(self):
         """Stops the screen recording process gracefully."""
